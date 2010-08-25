@@ -1,46 +1,101 @@
-#!/bin/bash
+#!/bin/sh
 
-### Init script for starting PHP CGI.
-BIND=127.0.0.1:9000
+# php-fcgi --- Init script for starting PHP CGI.
+
+# Copyright (C) 2010 António P. P. Almeida <appa@perusio.net>
+
+# Author: António P. P. Almeida <appa@perusio.net>
+
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+
+# Except as contained in this notice, the name(s) of the above copyright
+# holders shall not be used in advertising or otherwise to promote the sale,
+# use or other dealings in this Software without prior written authorization.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+# DEALINGS IN THE SOFTWARE.
+
+### BEGIN INIT INFO
+# Provides:          php-fcgi
+# Required-Start:    $local_fs $remote_fs $network $syslog
+# Required-Stop:     $local_fs $remote_fs $network $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: starts the php-fcgi process.
+# Description:       starts php-fcgi using start-stop-daemon
+### END INIT INFO
+
+
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+DAEMON=/usr/bin/php-cgi
+NAME=php-fcgi
+DESC=FastCGI
+
+test -x $DAEMON || exit 0
+
+## Whether the php cgi daemon should receive incoming requests using
+## Unix sockets or Internet Sockets. The default is Internet sockets.
+## Include php-cgi defaults if available.
+if [ -f /etc/default/php-cgi ] ; then
+    . /etc/default/php-cgi
+else
+    USE_UNIX=0
+fi
+
+## The user the process will run under. 
 USER=www-data
+
+## FastCGI specific parameters.
 PHP_FCGI_CHILDREN=15
 PHP_FCGI_MAX_REQUESTS=1000
 
-PHP_CGI=`which php-cgi`
-[ -x $PHP_CGI ] || exit 0
+## The arguments to pass to the php cgi program.
+DAEMON_OPTIONS="- USER=$USER PATH=/usr/bin PHP_FCGI_CHILDREN=$PHP_FCGI_CHILDREN PHP_FCGI_MAX_REQUESTS=$PHP_FCGI_MAX_REQUESTS"
 
-PHP_CGI_NAME=${PHP_CGI##*/}
-PHP_CGI_ARGS="- USER=$USER PATH=/usr/bin PHP_FCGI_CHILDREN=$PHP_FCGI_CHILDREN PHP_FCGI_MAX_REQUESTS=$PHP_FCGI_MAX_REQUESTS $PHP_CGI -b $BIND"
+set -e
 
-RETVAL=0
+## Using Unix sockets or not. Set the binding.
+if [[ $USE_UNIX == "1" ]]; then
+    BIND="/tmp/php-fcgi.socket"
+else
+    BIND=127.0.0.1:9000
+fi
 
-start() {
-      echo -n "Starting PHP FastCGI: "
-      start-stop-daemon --quiet --start --background --chuid "$USER" --exec /usr/bin/env -- $PHP_CGI_ARGS
-      RETVAL=$?
-      echo "$PHP_CGI_NAME."
-}
-stop() {
-      echo -n "Stopping PHP FastCGI: "
-      killall -q -w -u $USER $PHP_CGI
-      RETVAL=$?
-      echo "$PHP_CGI_NAME."
-}
+## Setting the binding of the php cgi daemon.
+DAEMON_OPTIONS="$DAEMON_OPTIONS -b $BIND"
 
 case "$1" in
     start)
-      start
-  ;;
+      echo -n "Starting $DESC: "
+      start-stop-daemon --quiet --start --background --chuid "$USER" --exec /usr/bin/env -- $DAEMON $DAEMON_OPTIONS
+      echo "$NAME."
+      ;;
     stop)
-      stop
-  ;;
-    restart)
-      stop
-      start
-  ;;
+        echo -n "Stopping $DESC: "
+        killall -q -w -u $USER $DAEMON
+        echo "$NAME."
+        ;;
+    restart|force-reload)
+        echo -n "Restarting $DESC: "
+        killall -q -w -u $USER $DAEMON
+        start-stop-daemon --quiet --start --background --chuid "$USER" --exec /usr/bin/env -- $DAEMON $DAEMON_OPTIONS
+        echo "$NAME."
+        ;;
     *)
-      echo "Usage: php-fastcgi {start|stop|restart}"
-      exit 1
-  ;;
+        echo "Usage: $NAME {start|stop|force-reload|restart}"
+        exit 1
+        ;;
 esac
-exit $RETVAL
