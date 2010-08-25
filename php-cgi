@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# php-fcgi --- Init script for starting PHP CGI.
+# php-cgi --- Init script for starting PHP CGI.
 
 # Copyright (C) 2010 António P. P. Almeida <appa@perusio.net>
 
@@ -69,7 +69,7 @@ set -e
 
 ## Using Unix sockets or not. Set the binding.
 if [[ $USE_UNIX == "1" ]]; then
-    BIND="/tmp/php-fcgi.socket"
+    BIND="/var/run/php-cgi.socket"
 else
     BIND=127.0.0.1:9000
 fi
