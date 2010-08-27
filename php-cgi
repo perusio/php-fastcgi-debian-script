@@ -79,25 +79,35 @@ else
     BIND=127.0.0.1:9000
 fi
 
+## Get the status of the PHP FastCGI daemon(s).
+php_cgi_status () {
+    pidof $DAEMON 2&>1 >/dev/null && echo " * $NAME is running" || echo " * $NAME is not running"
+}
+
+
+
 case "$1" in
     start)
-      echo -n "Starting $DESC: "
+      echo -n " Starting $DESC: "
       start-stop-daemon --quiet --start --background --chuid "$USER" --exec /usr/bin/env -- $DAEMON_OPTIONS $DAEMON -b $BIND
       echo "$NAME."
       ;;
     stop)
-        echo -n "Stopping $DESC: "
+        echo -n " Stopping $DESC: "
         killall -q -w -u $USER $DAEMON
         echo "$NAME."
         ;;
     restart|force-reload)
-        echo -n "Restarting $DESC: "
+        echo -n " Restarting $DESC: "
         killall -q -w -u $USER $DAEMON
         start-stop-daemon --quiet --start --background --chuid "$USER" --exec /usr/bin/env -- $DAEMON_OPTIONS $DAEMON -b $BIND
         echo "$NAME."
         ;;
+    status)
+        php_cgi_status
+        ;;
     *)
-        echo "Usage: $NAME {start|stop|force-reload|restart}"
+        echo "Usage: $NAME {start|stop|force-reload|restart|status}"
         exit 1
         ;;
 esac
