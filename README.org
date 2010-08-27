@@ -30,7 +30,7 @@
    3. Enable the =php-cgi= init script in the system run level
       configuration by issuing:
 
-      =update-rc-d php-cgi defaults 99=. 
+      =update-rc.d php-cgi defaults 99=. 
 
       This means that =php-cgi= will be started in run levels =2, 3,
       4= and =5= with a priority of *99* when launching all the
