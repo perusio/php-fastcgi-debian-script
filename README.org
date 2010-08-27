@@ -1,0 +1,69 @@
+* Debianized Init Script for running php-cgi with Nginx
+
+** Introduction
+
+   This is an init script written in a [[http://wiki.debian.org/LSBInitScripts][Debian]] like way for running PHP
+   FastCGI securely and efficiently.
+
+   Contrary to an widespread Urban Legend there's no need for the
+   =spawn-fcgi= program from =Lighttpd= for the PHP FastCGI process to
+   spawn new instances when necessary. This script is all you need to
+   run the PHP FastCGI daemon. 
+
+** Features
+   
+   1. Use of an =/etc/default/php-cgi= file that specifies whether to
+      use UNIX or Internet sockets. The default is *UNIX*.
+
+   2. PHP CGI process runs as the unprivileged user and group
+      =www-data=.
+
+   3. start, stop, restart, force-reload and status actions.
+
+** Installation
+
+   1. Install the =default/php-cgi= in =/etc/default=. Note that I'm
+      assuming a Debian like layout of the configuration files.
+
+   2. Install the =php-cgi= file in =/etc/init.d=.
+
+   3. Enable the =php-cgi= init script in the system run level
+      configuration by issuing:
+
+      =update-rc-d php-cgi defaults 99=. 
+
+      This means that =php-cgi= will be started in run levels =2, 3,
+      4= and =5= with a priority of *99* when launching all the
+      processes for the specified run level.
+
+   4. Start the PHP FastCGI daemon with the command:
+
+      =/etc/init.d/php-cgi start=
+
+      Now if you invoke =/etc/init.d/php-cgi status= the script will
+      tell if the process is running or not. If it is, then a
+      =/tmp/php-cgi= directory with permissions =700= will
+      appear. This is where the UNIX sockets are created.
+
+   5. Now run your web server or whatever process you want to relay
+      requests to the PHP FastCGI daemon. Every thing should work.
+
+   6. You can tune the =FastCGI= parameters =PHP_FCGI_CHILDREN= and 
+      =PHP_FCGI_MAX_REQUESTS= to whatever values work best for you.
+
+** PHP FPM
+
+   If you're using the [[http://php-fpm.org][PHP FPM]] (FastCGI Process Manager) the script
+   can be used almost verbatim. Just change the value of =DAEMON= to
+   =php-fpm= and you're done.
+
+** Security & Trust
+
+   The script is signed with my GPG key. Just do =gpg --keyserver
+   keys.gpg.net --recv-keys 4D722217=. Verify by issuing =gpg --verify
+   php-cgi.sig=.
+
+
+** Credits
+
+   This script steals heavily from the [[http://wiki.nginx.org/PHPFcgiExample][Nginx Wiki PHP FastCGI]] example.
