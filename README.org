@@ -50,12 +50,14 @@
 
    6. You can tune the =FastCGI= parameters =PHP_FCGI_CHILDREN= and 
       =PHP_FCGI_MAX_REQUESTS= to whatever values work best for you.
+      They're defined in the =/etc/default/php-cgi= file.
 
 ** PHP FPM
 
    If you're using the [[http://php-fpm.org][PHP FPM]] (FastCGI Process Manager) the script
    can be used almost verbatim. Just change the value of =DAEMON= to
-   =php-fpm= and you're done.
+   =php-fpm= and you're done. Note that a lot of niceties like
+   reloading of the configuration are missing. 
 
 ** Security & Trust
 

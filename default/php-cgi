@@ -2,3 +2,7 @@
 ## Whether the php cgi daemon should receive incoming requests using
 ## Unix sockets or Internet Sockets. The default is Unix sockets.
 USE_UNIX=1
+
+## The PHP fcgi control parameters.
+PHP_FCGI_CHILDREN=4
+PHP_FCGI_MAX_REQUESTS=1000
