@@ -52,6 +52,10 @@
       =PHP_FCGI_MAX_REQUESTS= to whatever values work best for you.
       They're defined in the =/etc/default/php-cgi= file.
 
+** Monitoring the process
+
+   I've published a [[http://mmonit.com][Monit]] [[http://github.com/perusio/monit-miscellaneous][configuration]] file for php-cgi github.
+
 ** PHP FPM
 
    If you're using the [[http://php-fpm.org][PHP FPM]] (FastCGI Process Manager) the script
