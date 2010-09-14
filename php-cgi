@@ -37,22 +37,28 @@
 # Short-Description: starts the php-fcgi process.
 # Description:       starts php-fcgi using start-stop-daemon
 ### END INIT INFO
-
-
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 DAEMON=/usr/bin/php-cgi
 NAME=php-cgi
 DESC=FastCGI
+PIDFILE=/var/run/$NAME.pid
 
 test -x $DAEMON || exit 0
+
 
 ## Whether the php cgi daemon should receive incoming requests using
 ## UNIX sockets or Internet Sockets. The default is Internet sockets.
 ## Include php-cgi defaults if available.
-if [ -f /etc/default/php-cgi ] ; then
-    . /etc/default/php-cgi
+if [ -f /etc/default/$NAME ] ; then
+    . /etc/default/$NAME
 else
     USE_UNIX=0
+fi
+
+## Check to see if the daemon is enabled.
+if [ $STARTUP != "1" ]; then
+    echo "To enable $NAME, edit /etc/default/$NAME and set STARTUP=1"
+    exit 0
 fi
 
 ## The user the process will run under. 
@@ -60,13 +66,12 @@ USER=www-data
 GROUP=www-data
 
 ## FastCGI specific parameters.
-PHP_FCGI_CHILDREN=${PHP_FCGI_CHILDREN-6}
-PHP_FCGI_MAX_REQUESTS=${PHP_FCGI_MAX_REQUESTS-1000}
+export PHP_FCGI_CHILDREN=${PHP_FCGI_CHILDREN-6}
+export PHP_FCGI_MAX_REQUESTS=${PHP_FCGI_MAX_REQUESTS-1000}
 
 ## The arguments to pass to the php cgi program.
 DAEMON_OPTIONS="- USER=$USER GROUP=$GROUP PATH=/usr/bin PHP_FCGI_CHILDREN=$PHP_FCGI_CHILDREN PHP_FCGI_MAX_REQUESTS=$PHP_FCGI_MAX_REQUESTS"
 
-set -e
 
 ## Using UNIX sockets or not. Set the binding.
 if [ $USE_UNIX == "1" ]; then
@@ -89,7 +94,7 @@ php_cgi_status () {
 case "$1" in
     start)
       echo -n " Starting $DESC: "
-      start-stop-daemon --quiet --start --background --chuid "$USER" --exec /usr/bin/env -- $DAEMON_OPTIONS $DAEMON -b $BIND
+      start-stop-daemon --quiet --start --background --chuid "$USER" --pidfile $PIDFILE --exec /usr/bin/env -- $DAEMON_OPTIONS $DAEMON -b $BIND
       echo "$NAME."
       ;;
     stop)
@@ -100,7 +105,7 @@ case "$1" in
     restart|force-reload)
         echo -n " Restarting $DESC: "
         killall -q -w -u $USER $DAEMON
-        start-stop-daemon --quiet --start --background --chuid "$USER" --exec /usr/bin/env -- $DAEMON_OPTIONS $DAEMON -b $BIND
+        start-stop-daemon --quiet --start --background --chuid "$USER" --pidfile $PIDFILE --exec /usr/bin/env -- $DAEMON_OPTIONS $DAEMON -b $BIND
         echo "$NAME."
         ;;
     status)

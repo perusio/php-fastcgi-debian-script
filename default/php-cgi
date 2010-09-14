@@ -1,4 +1,7 @@
 ##-*-shell-script-*-
+## Set this to 1 to enable the daemon.
+STARTUP=1
+
 ## Whether the php cgi daemon should receive incoming requests using
 ## Unix sockets or Internet Sockets. The default is Unix sockets.
 USE_UNIX=1
