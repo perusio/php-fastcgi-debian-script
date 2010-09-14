@@ -54,7 +54,7 @@
 
 ** Monitoring the process
 
-   I've published a [[http://mmonit.com][Monit]] [[http://github.com/perusio/monit-miscellaneous][configuration]] file for php-cgi github.
+   I've published a [[http://mmonit.com][Monit]] [[http://github.com/perusio/monit-miscellaneous][configuration]] file for php-cgi on github.
 
 ** PHP FPM
 
