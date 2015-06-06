@@ -92,26 +92,32 @@ php_cgi_status () {
 
 case "$1" in
     start)
-    echo -n " Starting $DESC: "
-    start-stop-daemon --quiet --start --background --chuid "$USER" --pidfile $PIDFILE --make-pidfile --exec /usr/bin/env -- $DAEMON_OPTIONS $DAEMON -b $BIND
-    echo "$NAME."
-    ;;
+      echo -n " Starting $DESC: "
+      start-stop-daemon --quiet --start --background --chuid "$USER" --pidfile $PIDFILE --make-pidfile --exec /usr/bin/env -- $DAEMON_OPTIONS $DAEMON -b $BIND
+      echo "$NAME."
+      ;;
+
     stop)
-    echo -n " Stopping $DESC: "
-    killall -q -w -u $USER $DAEMON
-    echo "$NAME."
-    ;;
+      echo -n " Stopping $DESC: "
+      killall -q -w -u $USER $DAEMON
+      /bin/rm $PIDFILE
+      echo "$NAME."
+      ;;
+   
     restart|force-reload)
-    echo -n " Restarting $DESC: "
-    killall -q -w -u $USER $DAEMON
-    start-stop-daemon --quiet --start --background --chuid "$USER" --pidfile $PIDFILE --make-pidfile --exec /usr/bin/env -- $DAEMON_OPTIONS $DAEMON -b $BIND
-    echo "$NAME."
-    ;;
+      echo -n " Restarting $DESC: "
+      killall -q -w -u $USER $DAEMON
+      /bin/rm $PIDFILE
+      start-stop-daemon --quiet --start --background --chuid "$USER" --pidfile $PIDFILE --make-pidfile --exec /usr/bin/env -- $DAEMON_OPTIONS $DAEMON -b $BIND
+      echo "$NAME."
+      ;;
+    
     status)
-    php_cgi_status
-    ;;
+      php_cgi_status
+      ;;
+
     *)
-    echo "Usage: $NAME {start|stop|force-reload|restart|status}"
-    exit 1
-    ;;
+      echo "Usage: $NAME {start|stop|force-reload|restart|status}"
+      exit 1
+      ;;
 esac
